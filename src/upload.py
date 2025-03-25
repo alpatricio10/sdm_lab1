@@ -61,15 +61,15 @@ def load_relationships(file_path, start_label, end_label, rel_type, start_key, e
 # Load nodes
 load_nodes('author_nodes.csv', 'Author', ['authorId', 'name', 'email'])
 load_nodes('paper_nodes.csv', 'Paper', ['paperId', 'title', 'abstract', 'pages', 'doi', 'url', 'citationCount'])
-load_nodes('journal_nodes.csv', 'Journal', ['name'])
-load_nodes('keyword_nodes.csv', 'Keyword', ['name'])
-load_nodes('event_nodes.csv', 'Event', ['eventId', 'year', 'venue', 'city'])
-load_nodes('organization_nodes.csv', 'Organization', ['name'])
+load_nodes('journal_nodes.csv', 'Journal', ['journalName'])
+load_nodes('keyword_nodes.csv', 'Keyword', ['keyword'])
+load_nodes('conference_nodes.csv', 'Conference', ['conferenceName', 'year', 'venue', 'city'])
+load_nodes('proceedings_nodes.csv', 'Proceeding', ['name', 'year'])
 
 # Load edges
 load_relationships('author_writes_paper.csv', 'Author', 'Paper', 'WRITES', 'authorId', 'paperId', ['corresponding_author'])
 load_relationships('author_reviews_paper.csv', 'Author', 'Paper', 'REVIEWS', 'authorId', 'paperId')
-load_relationships('paper_published_in.csv', 'Paper', 'Journal', 'PUBLISHED_IN', 'paperId', 'journalName', ['volume', 'year', 'isbn'])
-load_relationships('paper_cites_paper.csv', 'Paper', 'Paper', 'CITES', 'sourcePaperId', 'targetPaperId')
-load_relationships('paper_keyword_rels.csv', 'Paper', 'Keyword', 'HAS_KEYWORD', 'paperId', 'keyword')
-load_relationships('paper_presented_in.csv', 'Paper', 'Event', 'PRESENTED_IN', 'paperId', 'eventId')
+load_relationships('paper_published_in.csv', 'Paper', 'Journal', 'PUBLISHED_IN', 'paperId', 'journalName', ['volume', 'year'])
+# load_relationships('paper_cites_paper.csv', 'Paper', 'Paper', 'CITES', 'sourcePaperId', 'targetPaperId')
+load_relationships('paper_has_keyword.csv', 'Paper', 'Keyword', 'HAS_KEYWORD', 'paperId', 'keyword')
+load_relationships('paper_presented_in.csv', 'Paper', 'Conference', 'PRESENTED_IN', 'paperId', 'conferenceName')

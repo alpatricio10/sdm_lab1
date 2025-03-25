@@ -2,14 +2,20 @@
 from semanticscholar import SemanticScholar
 import csv
 import os
+import hashlib
+import uuid
 
 # TODO
 # make a csv with the ids connected to the keywords
 # update it to 100 papers per keywrod
 # publication venue
 
+def generate_custom_id():
+    unique_str = str(uuid.uuid4())  
+    return hashlib.sha1(unique_str.encode()).hexdigest() 
+
 def save_papers_to_csv(papers, filename="papers.csv"):
-    fieldnames = ['paperId', 'title', 'abstract', 'year', 'venue', 'url', 'authors', 'citationCount', 'references']
+    fieldnames = ['paperId', 'title', 'abstract', 'year', 'venue', 'url', 'authors', 'keyword', 'citationCount', 'references', 'journal', 'volume', 'isConference']
     
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -31,11 +37,15 @@ def save_papers_to_csv(papers, filename="papers.csv"):
                 'title': paper.title,
                 'abstract': paper.abstract,
                 'year': paper.year,
+                'isConference': paper.isConference,
                 'venue': paper.venue,
                 'url': paper.url,
                 'authors': authors,
+                'keyword': paper.keyword,
                 'references': references,
-                'citationCount': paper.citationCount if hasattr(paper, 'citationCount') else 0
+                'citationCount': paper.citationCount if hasattr(paper, 'citationCount') else 0,
+                'journal': paper.journal.name if hasattr(paper, 'journal') and hasattr(paper.journal, 'name') else None,
+                'volume': paper.journal.volume if hasattr(paper, 'journal') and hasattr(paper.journal, 'volume') else None
             }
             
             writer.writerow(row)
@@ -71,7 +81,7 @@ def save_authors_to_csv(authors, filename="authors.csv"):
     print(f"Authors saved to {os.path.abspath(filename)}")
 
 def save_journals_to_csv(journals, filename="journals.csv"):
-    fieldnames = ['name', 'pages', 'volume']
+    fieldnames = ['journalId', 'name', 'pages', 'volume']
     
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -79,6 +89,7 @@ def save_journals_to_csv(journals, filename="journals.csv"):
         
         for journal in journals:
             row = {
+                'journalId': generate_custom_id(),
                 'name': journal.name if hasattr(journal, 'name') else '',
                 'pages': journal.pages if hasattr(journal, 'pages') else '',
                 'volume': journal.volume if hasattr(journal, 'volume') else ''
@@ -87,6 +98,22 @@ def save_journals_to_csv(journals, filename="journals.csv"):
             writer.writerow(row)
     
     print(f"Journals saved to {os.path.abspath(filename)}")
+
+def save_keywords_to_csv(keywords, filename="keywords.csv"):
+    fieldnames = ['keyword']
+    
+    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        
+        for keyword in keywords:
+            row = {
+                'keyword': keyword,
+            }
+            
+            writer.writerow(row)
+    
+    print(f"Keywords saved to {os.path.abspath(filename)}")
 
 def search_and_save_papers(keywords, limit=100):
     sch = SemanticScholar()
@@ -110,6 +137,10 @@ def search_and_save_papers(keywords, limit=100):
         # Search for Journal Articles
         papers = sch.search_paper(query=keyword, limit=limit, publication_types = ['JournalArticle'])
         for paper in papers.items:
+            # Append additional fields
+            paper.keyword = keyword
+            paper.isConference = False
+
             # Paper Information
             if paper.paperId not in seen_paper_ids:
                 all_papers.append(paper)
@@ -136,6 +167,10 @@ def search_and_save_papers(keywords, limit=100):
         # Search for Conference Papers
         papers = sch.search_paper(query=keyword, limit=limit, publication_types = ['Conference'])
         for paper in papers.items:
+            # Append additional fields
+            paper.keyword = keyword
+            paper.isConference = True
+
             # Paper Information
             if paper.paperId not in seen_paper_ids:
                 all_papers.append(paper)
@@ -148,17 +183,12 @@ def search_and_save_papers(keywords, limit=100):
                         all_authors.append(author)
                         seen_author_ids[author.authorId] = True
 
-    
+
     print(f"Total unique papers found: {len(all_papers)}")
     save_papers_to_csv(all_papers)
     save_authors_to_csv(all_authors)
     save_journals_to_csv(all_journals)
-
-    # for i, paper in enumerate(all_papers[:50]):
-    #     print(f"{i+1}. {paper.title}")
-    #     if hasattr(paper, 'publicationTypes') and paper.publicationTypes is not None:
-    #         for t in paper.publicationTypes:
-    #             print(t)
+    save_keywords_to_csv(keywords)
     
     return all_papers
 
