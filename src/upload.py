@@ -1,75 +1,156 @@
-from py2neo import Graph, Node, Relationship
-import pandas as pd
+from py2neo import Graph
+import os
 
 # Connect to Neo4j
 graph = Graph("bolt://localhost:7687", auth=("neo4j", "password"))
 
-# Clear existing data
-graph.run("MATCH (n) DETACH DELETE n")
+def load_csv_data():
+    # Clear existing data
+    graph.run("MATCH (n) DETACH DELETE n")
 
-# Load nodes
-def load_nodes(file_path, label, properties):
-    df = pd.read_csv(file_path)
-    
-    # Create batch of nodes
-    tx = graph.begin()
-    count = 0
-    
-    for _, row in df.iterrows():
-        node_props = {prop: row[prop] for prop in properties if prop in row}
-        node = Node(label, **node_props)
-        tx.create(node)
+    # Cypher commands to load nodes and relationships
+    node_load_queries = [
+        # Author Nodes
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///author_nodes.csv' AS row
+        CREATE (:Author {
+            authorId: row.authorId, 
+            name: row.name, 
+            email: row.email
+        })
+        """,
         
-        count += 1
-        if count % 1000 == 0:  # Commit in batches of 1000
-            graph.commit(tx)
-            tx = graph.begin()
-    
-    graph.commit(tx)
-    print(f"Loaded {count} {label} nodes")
-
-# Load relationships
-def load_relationships(file_path, start_label, end_label, rel_type, start_key, end_key, properties=None):
-    if properties is None:
-        properties = []
-    
-    df = pd.read_csv(file_path)
-    
-    # Create batch of relationships
-    tx = graph.begin()
-    count = 0
-    
-    for _, row in df.iterrows():
-        # Get the start and end nodes
-        start_node = graph.nodes.match(start_label, **{start_key.split('.')[-1]: row[start_key]}).first()
-        end_node = graph.nodes.match(end_label, **{end_key.split('.')[-1]: row[end_key]}).first()
+        # Paper Nodes
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///paper_nodes.csv' AS row
+        CREATE (:Paper {
+            paperId: row.paperId, 
+            title: row.title, 
+            abstract: row.abstract, 
+            pages: toInteger(row.pages), 
+            doi: row.doi, 
+            url: row.url, 
+            citationCount: toInteger(row.citationCount)
+        })
+        """,
         
-        if start_node and end_node:
-            # Create relationship properties
-            rel_props = {prop: row[prop] for prop in properties if prop in row}
-            rel = Relationship(start_node, rel_type, end_node, **rel_props)
-            tx.create(rel)
-            
-            count += 1
-            if count % 1000 == 0:  # Commit in batches of 1000
-                graph.commit(tx)
-                tx = graph.begin()
-    
-    graph.commit(tx)
-    print(f"Loaded {count} {rel_type} relationships")
+        # Journal Nodes
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///journal_nodes.csv' AS row
+        CREATE (:Journal {
+            journalName: row.journalName
+        })
+        """,
+        
+        # Keyword Nodes
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///keyword_nodes.csv' AS row
+        CREATE (:Keyword {
+            keyword: row.keyword
+        })
+        """,
+        
+        # Conference Nodes
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///conference_nodes.csv' AS row
+        CREATE (:Conference {
+            conferenceName: row.conferenceName, 
+            year: toInteger(row.year), 
+            venue: row.venue, 
+            city: row.city
+        })
+        """,
+        
+        # Proceedings Nodes
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///proceedings_nodes.csv' AS row
+        CREATE (:Proceeding {
+            name: row.name, 
+            year: toInteger(row.year)
+        })
+        """
+    ]
 
-# Load nodes
-load_nodes('author_nodes.csv', 'Author', ['authorId', 'name', 'email'])
-load_nodes('paper_nodes.csv', 'Paper', ['paperId', 'title', 'abstract', 'pages', 'doi', 'url', 'citationCount'])
-load_nodes('journal_nodes.csv', 'Journal', ['journalName'])
-load_nodes('keyword_nodes.csv', 'Keyword', ['keyword'])
-load_nodes('conference_nodes.csv', 'Conference', ['conferenceName', 'year', 'venue', 'city'])
-load_nodes('proceedings_nodes.csv', 'Proceeding', ['name', 'year'])
+    # Relationship load queries
+    relationship_load_queries = [
+        # Author WRITES Paper Relationships
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///author_writes_paper.csv' AS row
+        MATCH (a:Author {authorId: row.authorId})
+        MATCH (p:Paper {paperId: row.paperId})
+        CREATE (a)-[:WRITES {corresponding_author: row.corresponding_author}]->(p)
+        """,
+        
+        # Author REVIEWS Paper Relationships
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///author_reviews_paper.csv' AS row
+        MATCH (a:Author {authorId: row.authorId})
+        MATCH (p:Paper {paperId: row.paperId})
+        CREATE (a)-[:REVIEWS]->(p)
+        """,
+        
+        # Paper PUBLISHED_IN Journal Relationships
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///paper_published_in.csv' AS row
+        MATCH (p:Paper {paperId: row.paperId})
+        MATCH (j:Journal {journalName: row.journalName})
+        CREATE (p)-[:PUBLISHED_IN {
+            volume: row.volume, 
+            year: toInteger(row.year)
+        }]->(j)
+        """,
+        
+        # Paper HAS_KEYWORD Relationships
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///paper_has_keyword.csv' AS row
+        MATCH (p:Paper {paperId: row.paperId})
+        MATCH (k:Keyword {keyword: row.keyword})
+        CREATE (p)-[:HAS_KEYWORD]->(k)
+        """,
+        
+        # Paper PRESENTED_IN Conference Relationships
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///paper_presented_in.csv' AS row
+        MATCH (p:Paper {paperId: row.paperId})
+        MATCH (c:Conference {conferenceName: row.conferenceName})
+        CREATE (p)-[:PRESENTED_IN]->(c)
+        """
+    ]
 
-# Load edges
-load_relationships('author_writes_paper.csv', 'Author', 'Paper', 'WRITES', 'authorId', 'paperId', ['corresponding_author'])
-load_relationships('author_reviews_paper.csv', 'Author', 'Paper', 'REVIEWS', 'authorId', 'paperId')
-load_relationships('paper_published_in.csv', 'Paper', 'Journal', 'PUBLISHED_IN', 'paperId', 'journalName', ['volume', 'year'])
-# load_relationships('paper_cites_paper.csv', 'Paper', 'Paper', 'CITES', 'sourcePaperId', 'targetPaperId')
-load_relationships('paper_has_keyword.csv', 'Paper', 'Keyword', 'HAS_KEYWORD', 'paperId', 'keyword')
-load_relationships('paper_presented_in.csv', 'Paper', 'Conference', 'PRESENTED_IN', 'paperId', 'conferenceName')
+    # Execute node loading queries
+    print("Loading Nodes...")
+    for query in node_load_queries:
+        graph.run(query)
+        print(f"Executed: {query.split('\n')[0]}")
+
+    # Execute relationship loading queries
+    print("\nLoading Relationships...")
+    for query in relationship_load_queries:
+        graph.run(query)
+        print(f"Executed: {query.split('\n')[0]}")
+
+    print("\nData loading complete!")
+
+def create_indexes():
+    index_queries = [
+        "CREATE INDEX author_id IF NOT EXISTS FOR (a:Author) ON (a.authorId)",
+        "CREATE INDEX paper_id IF NOT EXISTS FOR (p:Paper) ON (p.paperId)",
+        "CREATE INDEX journal_name IF NOT EXISTS FOR (j:Journal) ON (j.journalName)",
+        "CREATE INDEX keyword IF NOT EXISTS FOR (k:Keyword) ON (k.keyword)",
+        "CREATE INDEX conference_name IF NOT EXISTS FOR (c:Conference) ON (c.conferenceName)"
+    ]
+
+    print("\nCreating Indexes...")
+    for query in index_queries:
+        graph.run(query)
+        print(f"Created index: {query}")
+
+def main():
+    try:
+        load_csv_data()
+        create_indexes()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    main()

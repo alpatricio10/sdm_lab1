@@ -193,7 +193,6 @@ def search_and_save_papers(keywords, limit=100):
     return all_papers
 
 # Search 100 papers from each keyword
-keywords = ['data management', 'indexing']
-# keywords = ['data management', 'indexing', 'data modeling', 'big data', 'data processing', 'data storage', 'data querying', 'artificial intelligence', 'machine learning', 'ethics', 'semantic data', 'data warehouse', 'process mining', 'decision support']
+keywords = ['data management', 'indexing', 'data modeling', 'big data', 'data processing', 'data storage', 'data querying', 'artificial intelligence', 'machine learning', 'ethics', 'semantic data', 'data warehouse', 'process mining', 'decision support']
 
 papers = search_and_save_papers(keywords, limit=100)
