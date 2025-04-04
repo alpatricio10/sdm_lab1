@@ -1,14 +1,12 @@
-from py2neo import Graph
+from neo4j import GraphDatabase
 import os
 
-# Connect to Neo4j
-graph = Graph("bolt://localhost:7687", auth=("neo4j", "password"))
+# Neo4j connection params
+uri = "bolt://localhost:7687"  
+username = "neo4j"  
+password = "password"  
 
-def load_csv_data():
-    # Clear existing data
-    graph.run("MATCH (n) DETACH DELETE n")
-
-    # Cypher commands to load nodes and relationships
+def load_csv_data(driver):
     node_load_queries = [
         # Author Nodes
         """
@@ -49,11 +47,12 @@ def load_csv_data():
             keyword: row.keyword
         })
         """,
-        
-        # Conference Nodes
+
+        # Proceedings Nodes
         """
-        LOAD CSV WITH HEADERS FROM 'file:///conference_nodes.csv' AS row
-        CREATE (:Conference {
+        LOAD CSV WITH HEADERS FROM 'file:///proceedings_nodes.csv' AS row
+        CREATE (:Proceeding {
+            proceedingId: row.proceedingId, 
             conferenceName: row.conferenceName, 
             year: toInteger(row.year), 
             venue: row.venue, 
@@ -61,17 +60,15 @@ def load_csv_data():
         })
         """,
         
-        # Proceedings Nodes
+        # Conference Nodes
         """
-        LOAD CSV WITH HEADERS FROM 'file:///proceedings_nodes.csv' AS row
-        CREATE (:Proceeding {
-            name: row.name, 
-            year: toInteger(row.year)
+        LOAD CSV WITH HEADERS FROM 'file:///conferences_nodes.csv' AS row
+        CREATE (:Conference {
+            conferenceName: row.conferenceName
         })
         """
     ]
 
-    # Relationship load queries
     relationship_load_queries = [
         # Author WRITES Paper Relationships
         """
@@ -107,31 +104,45 @@ def load_csv_data():
         MATCH (k:Keyword {keyword: row.keyword})
         CREATE (p)-[:HAS_KEYWORD]->(k)
         """,
+
+        # Paper CITES Paper Relationships
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///paper_cites_paper.csv' AS row
+        MATCH (p1:Paper {paperId: row.sourcePaperId})
+        MATCH (p2:Paper {paperId: row.targetPaperId})
+        CREATE (p1)-[:CITES]->(p2)
+        """,
         
-        # Paper PRESENTED_IN Conference Relationships
+        # Paper PRESENTED_IN Proceeding Relationships
         """
         LOAD CSV WITH HEADERS FROM 'file:///paper_presented_in.csv' AS row
         MATCH (p:Paper {paperId: row.paperId})
-        MATCH (c:Conference {conferenceName: row.conferenceName})
+        MATCH (pr:Proceeding {proceedingId: row.proceedingId})
         CREATE (p)-[:PRESENTED_IN]->(c)
+        """,
+
+        # Proceeding PART_OF Conference Relationships
+        """
+        LOAD CSV WITH HEADERS FROM 'file:///proceeding_part_of.csv' AS row
+        MATCH (pr:Proceeding {proceedingId: row.proceedingId})
+        MATCH (c:Conference {conferenceName: row.conferenceName})
+        CREATE (p)-[:IS_PART_OF]->(c)
         """
     ]
 
-    # Execute node loading queries
-    print("Loading Nodes...")
-    for query in node_load_queries:
-        graph.run(query)
-        print(f"Executed: {query.split('\n')[0]}")
+    with driver.session() as session:
+        print("Clearing existing data...")
+        session.run("MATCH (n) DETACH DELETE n")
 
-    # Execute relationship loading queries
-    print("\nLoading Relationships...")
-    for query in relationship_load_queries:
-        graph.run(query)
-        print(f"Executed: {query.split('\n')[0]}")
+        print("Loading Nodes...")
+        for query in node_load_queries:
+            session.run(query)
 
-    print("\nData loading complete!")
+        print("Loading Relationships...")
+        for query in relationship_load_queries:
+            session.run(query)
 
-def create_indexes():
+def create_indexes(driver):
     index_queries = [
         "CREATE INDEX author_id IF NOT EXISTS FOR (a:Author) ON (a.authorId)",
         "CREATE INDEX paper_id IF NOT EXISTS FOR (p:Paper) ON (p.paperId)",
@@ -141,16 +152,13 @@ def create_indexes():
     ]
 
     print("\nCreating Indexes...")
-    for query in index_queries:
-        graph.run(query)
-        print(f"Created index: {query}")
+    with driver.session() as session:
+        for query in index_queries:
+            session.run(query)
 
-def main():
+with GraphDatabase.driver(uri, auth=(username, password)) as driver:
     try:
-        load_csv_data()
-        create_indexes()
+        load_csv_data(driver)
+        create_indexes(driver)
     except Exception as e:
         print(f"An error occurred: {e}")
-
-if __name__ == "__main__":
-    main()

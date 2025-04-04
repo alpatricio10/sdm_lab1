@@ -5,11 +5,6 @@ import os
 import hashlib
 import uuid
 
-# TODO
-# make a csv with the ids connected to the keywords
-# update it to 100 papers per keywrod
-# publication venue
-
 def generate_custom_id():
     unique_str = str(uuid.uuid4())  
     return hashlib.sha1(unique_str.encode()).hexdigest() 

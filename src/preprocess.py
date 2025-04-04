@@ -12,17 +12,9 @@ def generate_email(name):
     username = name.replace(' ', '.').lower()
     return f"{username}@{random.choice(domains)}"
 
-# Function to generate random DOIs
-def generate_doi(paper_id):
-    return f"10.{random.randint(1000, 9999)}/{paper_id}"
-
 def generate_weighted_reviewer_count():
     # Generates a reviewer count with a bias towards 3
     return random.choices([2, 3, 4, 5], weights=[0.1, 0.6, 0.2, 0.1])[0]
-
-# Function to generate random ISBN
-def generate_isbn():
-    return f"978-{random.randint(0, 9)}-{random.randint(10000, 99999)}-{random.randint(100, 999)}-{random.randint(0, 9)}"
 
 # Function to generate random city and venue
 def generate_city_and_venue():
@@ -58,11 +50,49 @@ def generate_organization():
     
     return f"{random.choice(prefixes)} {random.choice(subjects)} {random.choice(types)}"
 
+# Clean the venue names
+def clean_venue_name(name):
+    if isinstance(name, str):
+        name = name.strip('"')
+        name = re.sub(r'\b\d{4}\b|\[\d{4}\]|\b\d{4}\s+\d+(?:st|nd|rd|th)?', '', name)
+        name = re.sub(r'Proceedings of( the)?|Proceeding of the|Proceedings\.?', '', name)
+        name = re.sub(r'\b(?:\d+(?:st|nd|rd|th)|First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth|Eleventh|Twelfth|Thirteenth)\b', '', name)
+        name = re.sub(r'\(Cat\.\s*No\..*?\)', '', name)
+        name = re.sub(r', \d{4}(?:\.|$)', '', name)
+        name = re.sub(r'(?:- |, )(?:Proceedings|Volume \d+)', '', name)
+        name = re.sub(r'\s+', ' ', name)
+        name = re.sub(r'\s*-\s*', ' ', name)
+        name = re.sub(r'\s*:\s*', ': ', name)
+        name = re.sub(r'\s*,\s*', ', ', name)
+        name = re.sub(r'^\/', '', name)
+        name = name.strip(' .,;:-"')
+    return name
+
+# Clean text e.g. abstract and title
+def clean_text(text):
+    if isinstance(text, str):
+        text = re.sub(r'[^A-Za-z0-9\s.,-:]', '', text)  
+        text = re.sub(r'\s+', ' ', text).strip()  
+    return text
+
+def convert_int(value):
+    try:
+        return int(value)
+    except Exception:
+        return value
+
 # Load the data
-papers = pd.read_csv('papers.csv')
-authors = pd.read_csv('authors.csv')
-journals = pd.read_csv('journals.csv')
-keywords = pd.read_csv('keywords.csv')
+papers = pd.read_csv('final_output/papers.csv')
+authors = pd.read_csv('final_output/authors.csv')
+venues = pd.read_csv('final_output/venues.csv')
+keywords = pd.read_csv('final_output/paper_keywords.csv')
+
+# Clean data
+papers['venue'] = papers['venue'].apply(clean_venue_name)
+papers['title'] = papers['title'].apply(clean_text)
+papers['abstract'] = papers['abstract'].apply(clean_text)
+papers['pages'] = papers['pages'].apply(clean_text)
+venues['name'] = venues['name'].apply(clean_venue_name)
 
 # Create nodes and relationships dataframes
 # 1. Author nodes
@@ -79,83 +109,65 @@ paper_nodes = pd.DataFrame({
     'title': papers['title'],
     'abstract': papers['abstract'],
     'pages': np.random.randint(1, 30, size=len(papers)), 
-    'doi': papers['paperId'].apply(generate_doi),
+    'doi': papers['doi'],
     'url': papers['url'],
     'citationCount': papers['citationCount']
 })
 paper_nodes.to_csv('paper_nodes.csv', index=False)
 
-# 3. Journal nodes (from journals.csv)
-journal_nodes = pd.DataFrame({
-    'journalName': journals['name']
-}).drop_duplicates(subset=['journalName'])
-journal_nodes.to_csv('journal_nodes.csv', index=False)
+# 3. Journal nodes 
+journals = []
+for index, row in venues.iterrows():
+    if row['venueType'] == 'JournalArticle':
+        journals.append({
+            'journalName': row['name'],
+        })
 
-# # 3. Volume nodes (from journals.csv)
-# # Create volume during relationship loop
-# volume_nodes = pd.DataFrame({
-#     'volumeNumber': journals['volume'],
-#     'year': 2020
-# })
-# volume_nodes.to_csv('volume_nodes.csv', index=False)
+journal_nodes = pd.DataFrame(journals).drop_duplicates(subset=['journalName'])
+journal_nodes.to_csv('journal_nodes.csv', index=False)
 
 # 4. Keyword nodes 
 keyword_nodes = pd.DataFrame({
     'keyword': keywords['keyword']
-})
+}).drop_duplicates(subset=['keyword'])
 keyword_nodes.to_csv('keyword_nodes.csv', index=False)
-
-# 5. Conference nodes 
-conferences = []
-for index, row in papers.iterrows():
-    city, venue = generate_city_and_venue()
-    if row['isConference'] == True:
-        conferences.append({
-            'conferenceName': row['venue'],
-            'year': row['year'],
-            'venue': venue,
-            'city': city
-        })
-
-# drop duplicates somehow
-# conference_nodes = pd.DataFrame(events).drop_duplicates(subset=['eventId'])
-conference_nodes = pd.DataFrame(conferences)
-conference_nodes.to_csv('conference_nodes.csv', index=False)
 
 # 5. Proceedings nodes 
 proceedings = []
 for index, row in papers.iterrows():
-    if row['isConference'] == True:
+    city, venue = generate_city_and_venue()
+    if row['venueType'] == 'Conference':
         proceedings.append({
-            'name': row['journal'],
-            'year': row['year']
+            'proceedingId': uuid.uuid4(),
+            'conferenceName': row['venue'],
+            'year': convert_int(row['year']),
+            'venue': venue,
+            'city': city
         })
 
-proceeding_nodes = pd.DataFrame(proceedings)
-proceeding_nodes.to_csv('proceedings_nodes.csv', index=False)
+proceedings_nodes = pd.DataFrame(proceedings).drop_duplicates(subset=['conferenceName', 'year'])
+proceedings_nodes.sort_values(by=['conferenceName', 'year'], inplace=True)
+proceedings_nodes['edition'] = proceedings_nodes.groupby('conferenceName')['year'].transform(lambda x: x - x.iloc[0] + 1).astype(int)
+proceedings_nodes.to_csv('proceedings_nodes.csv', index=False)
 
-# Create relationships
-# Volume part of Journal
-# paper_events = []
-# for index, row in papers.iterrows():
-#     event_id = f"event_{row['venue']}_{row['year']}"
-#     paper_events.append({
-#         'volumeId': row['paperId'],
-#         'paperId': event_id
-#     })
+# 6. Conferences nodes 
+conferences = []
+for index, row in venues.iterrows():
+    if row['venueType'] == 'Conference':
+        conferences.append({
+            'conferenceName': row['name']
+        })
 
-# volume_part_of = pd.DataFrame(paper_events)
-# volume_part_of.to_csv('volume_part_of.csv', index=False)
+conference_nodes = pd.DataFrame(conferences).drop_duplicates(subset=['conferenceName'])
+conference_nodes.to_csv('conferences_nodes.csv', index=False)
 
 # 1. Author writes Paper
 author_papers = []
-# Parse the authors field from papers.csv
 for index, row in papers.iterrows():
     paperId = row['paperId']
     if isinstance(row['authors'], str):
         author_list = row['authors'].split(';')
         for i, authorId in enumerate(author_list):
-            
             author_papers.append({
                 'authorId': authorId,
                 'paperId': paperId,
@@ -186,68 +198,56 @@ author_reviews_paper.to_csv('author_reviews_paper.csv', index=False)
 # 3. Paper published in Journal
 paper_journal = []
 for index, row in papers.iterrows():
-    if row['isConference'] == False:
+    if row['venueType'] == 'JournalArticle':
         paper_journal.append({
             'paperId': row['paperId'],
-            'journalName': row['journal'],
-            'volume': row['volume'],
-            'year': row['year']
+            'journalName': row['venue'],
+            'volume': random.randint(1, 50),
+            'year': convert_int(row['year'])
         })
 
 paper_published_in = pd.DataFrame(paper_journal)
 paper_published_in.to_csv('paper_published_in.csv', index=False)
 
 # 4. Paper cites Paper
-# paper_citations = []
-# for index, row in papers.iterrows():
-#     paper_id = row['paperId']
-#     # Check if references column exists and has data
-#     if 'references' in papers.columns and isinstance(row['references'], str):
-#         references = row['references'].split(',')
-#         for ref in references:
-#             ref = ref.strip()
-#             # Check if referenced paper exists in our dataset
-#             if ref in papers['paperId'].values:
-#                 paper_citations.append({
-#                     'sourcePaperId': paper_id,
-#                     'targetPaperId': ref
-#                 })
+paper_citations = []
+for index, row in papers.iterrows():
+    paper_id = row['paperId']
+    if isinstance(row['references'], str):
+        references = row['references'].split(';')
+        for ref in references:
+            ref = ref.strip()
+            if ref in papers['paperId'].values:
+                paper_citations.append({
+                    'sourcePaperId': paper_id,
+                    'targetPaperId': ref
+                })
 
-# paper_cites_paper = pd.DataFrame(paper_citations)
-# paper_cites_paper.to_csv('paper_cites_paper.csv', index=False)
+paper_cites_paper = pd.DataFrame(paper_citations)
+paper_cites_paper.to_csv('paper_cites_paper.csv', index=False)
 
 # 5. Paper presented in 
-paper_presented = []
+paper_presented_in = []
 for index, row in papers.iterrows():
-    if row['isConference'] == True:
-        paper_presented.append({
-            'paperId': row['paperId'],
-            'conferenceName': row['venue']
-        })
+    if row['venueType'] == 'Conference':
+        proceeding = proceedings_nodes[(proceedings_nodes['conferenceName'] == row['venue']) & (proceedings_nodes['year'] == row['year'])]
+        if not proceeding.empty:
+            proceedingId = proceeding['proceedingId'].iloc[0]  
+            paper_presented_in.append({
+                'paperId': row['paperId'],
+                'proceedingId': proceedingId 
+            })
 
-paper_presented_in = pd.DataFrame(paper_presented)
+paper_presented_in = pd.DataFrame(paper_presented_in)
 paper_presented_in.to_csv('paper_presented_in.csv', index=False)
 
-# 6. Event is part of Organization
-# event_orgs = []
-# for event_id, org_name in organizations.items():
-#     event_orgs.append({
-#         'eventId': event_id,
-#         'organizationName': org_name
-#     })
+# 6. Proceedings is part of Conference
+proceeding_part_of_conf = proceedings_nodes[['proceedingId', 'conferenceName']].copy()
+proceeding_part_of_conf.to_csv('proceeding_part_of.csv', index=False)
 
-# event_part_of_org = pd.DataFrame(event_orgs)
-# event_part_of_org.to_csv('event_part_of_org.csv', index=False)
-
-# 3. Paper has keywords
-paper_keywords = []
-for index, row in papers.iterrows():
-    paper_keywords.append({
-        'paperId': row['paperId'],
-        'keyword': row['keyword'],
-    })
-
-paper_has_keyword = pd.DataFrame(paper_keywords)
+# 7. Paper has keywords
+paper_has_keyword = pd.DataFrame({
+    'paperId': keywords['paperId'],
+    'keyword': keywords['keyword'],
+})
 paper_has_keyword.to_csv('paper_has_keyword.csv', index=False)
-
-# Add published in conference relationship
