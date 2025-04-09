@@ -53,7 +53,6 @@ def load_csv_data(driver):
         LOAD CSV WITH HEADERS FROM 'file:///proceedings_nodes.csv' AS row
         CREATE (:Proceeding {
             proceedingId: row.proceedingId, 
-            conferenceName: row.conferenceName, 
             year: toInteger(row.year), 
             venue: row.venue, 
             city: row.city,
@@ -149,7 +148,8 @@ def create_indexes(driver):
         "CREATE INDEX paper_id IF NOT EXISTS FOR (p:Paper) ON (p.paperId)",
         "CREATE INDEX journal_name IF NOT EXISTS FOR (j:Journal) ON (j.journalName)",
         "CREATE INDEX keyword IF NOT EXISTS FOR (k:Keyword) ON (k.keyword)",
-        "CREATE INDEX conference_name IF NOT EXISTS FOR (c:Conference) ON (c.conferenceName)"
+        "CREATE INDEX conference_name IF NOT EXISTS FOR (c:Conference) ON (c.conferenceName)",
+        "CREATE INDEX proceeding_id IF NOT EXISTS FOR (p:Proceeding) ON (p.proceedingId)"
     ]
 
     print("\nCreating Indexes...")
