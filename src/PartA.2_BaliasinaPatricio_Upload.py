@@ -118,7 +118,7 @@ def load_csv_data(driver):
         LOAD CSV WITH HEADERS FROM 'file:///paper_presented_in.csv' AS row
         MATCH (p:Paper {paperId: row.paperId})
         MATCH (pr:Proceeding {proceedingId: row.proceedingId})
-        CREATE (p)-[:PRESENTED_IN]->(c)
+        CREATE (p)-[:PRESENTED_IN]->(pr)
         """,
 
         # Proceeding PART_OF Conference Relationships
@@ -126,7 +126,7 @@ def load_csv_data(driver):
         LOAD CSV WITH HEADERS FROM 'file:///proceeding_part_of.csv' AS row
         MATCH (pr:Proceeding {proceedingId: row.proceedingId})
         MATCH (c:Conference {conferenceName: row.conferenceName})
-        CREATE (p)-[:IS_PART_OF]->(c)
+        CREATE (pr)-[:IS_PART_OF]->(c)
         """
     ]
 
