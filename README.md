@@ -18,3 +18,4 @@ This is the codebase for Semantic Data Management Lab Assignment 1 at UPC. It wa
 - The /data folder contains the output after the preprocessing step. This can then be used to upload the data into the graph database. 
 - The /src/final_output folder contains the output after extracting all the needed information and citations from Semantic Scholar.
 - The docker-compose file and GDS executable are added here for your reference. This was used to run Neo4J in WSL. Update the docker-compose file to the appropriate volume paths before running.
+- Result samples are located in the /results directory.
