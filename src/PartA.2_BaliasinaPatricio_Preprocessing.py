@@ -41,15 +41,6 @@ def generate_city_and_venue():
     
     return city, venue
 
-# Function to generate random organization name
-def generate_organization():
-    prefixes = ["International", "European", "American", "Asian", "World", "Global"]
-    subjects = ["Computer Science", "AI", "Machine Learning", "Data Science", "Bioinformatics", 
-                "Computational Biology", "Software Engineering", "Information Systems"]
-    types = ["Association", "Society", "Institute", "Consortium", "Federation"]
-    
-    return f"{random.choice(prefixes)} {random.choice(subjects)} {random.choice(types)}"
-
 # Clean the venue names
 def clean_venue_name(name):
     if isinstance(name, str):
