@@ -12,7 +12,10 @@ This is the codebase for Semantic Data Management Lab Assignment 1 at UPC. It wa
 - PartD_BaliasinaPatricio.py: This script contains the graph algorithm queries for Part D.
 
 ## How to Run
-
+- Run PartA.2_BaliasinaPatricio_Extraction_References.py to retrieve a list of original papers (~560) with paperIDs, keywords, venue type and references. This outputs a CSV file called papers_combined.csv. This must be placed in the same directory as PartA.2_BaliasinaPatricio_Extraction_Async_Fetching_Fields.py, which should then be run to extract all the other required fields for papers. This step outputs 4 CSV files containing all the required information for the graph.
+- Run PartA.2_BaliasinaPatricio_Preprocessing.py to process the data for loading into Neo4J. The CSV files from the previous step should be placed inside a final_output directory. This outputs separate CSVs corresponding to each node and edge to be uploaded into the graph.
+- The CSV files from the previous step must be placed in the /import directory of Neo4J. In our case, we used a docker image where the /import directory is located within the src folder. Run PartA.2_BaliasinaPatricio_Upload.py to create and populate the graph database.
+- Run PartA.3_BaliasinaPatricio.py to extend the graph with the additional required information in Part A.3.
 
 ## Notes
 - The /data folder contains the output after the preprocessing step. This can then be used to upload the data into the graph database. 
