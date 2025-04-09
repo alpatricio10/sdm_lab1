@@ -1,0 +1,80 @@
+﻿authorId,authorName,relPaperCount,relIsGuru
+144947410,R. Agrawal,3,true
+2047446108,Tomas Mikolov,3,true
+3253916,Ashish Thusoo,2,true
+1781565,C. Dwork,2,true
+1726807,Diederik P. Kingma,2,true
+34838386,K. Simonyan,2,true
+143834867,M. Zaharia,2,true
+50659286,A. Guttman,1,false
+3407277,Adam Paszke,1,false
+38909097,Alec Radford,1,false
+144906624,Alex Wang,1,false
+1922104,Andreas Kipf,1,false
+40348417,Ashish Vaswani,1,false
+9229182,B. Recht,1,false
+2780009,Brian F. Cooper,1,false
+2271808,Bryan Perozzi,1,false
+153514924,C. Diaconu,1,false
+1404628011,Chanop Silpa-Anan,1,false
+2574060,Christian Szegedy,1,false
+2072569,Christopher Olston,1,false
+2286488640,Christos Faloutsos,1,false
+35238678,D. Lowe,1,false
+20154699,D. Murray,1,false
+2286482409,Davood Rafiei,1,false
+2289719171,Debayan Gupta,1,false
+2075265628,Douglas Comer,1,false
+2771609,E. McCreight,1,false
+47260481,F. Scarselli,1,false
+48445225,Fay W. Chang,1,false
+144145211,G. Cong,1,false
+1766747,G. Malewicz,1,false
+143678972,G. Navarro,1,false
+2084122290,Giuseppe DeCandia,1,false
+1701686,I. Sutskever,1,false
+49959210,J. Dean,1,false
+119640649,Jason Wei,1,false
+143845796,Jeffrey Pennington,1,false
+153302678,Jia Deng,1,false
+40380893,Jonathan M. Kaldor,1,false
+49988044,Joseph E. Gonzalez,1,false
+1742448,K. Bollacker,1,false
+2272877588,Konstantin Shvachko,1,false
+1979489,Kyunghyun Cho,1,false
+31793034,Long Ouyang,1,false
+2090818,M. Isard,1,false
+8373823,M. Rosenblum,1,false
+2057642721,Martín Abadi,1,false
+144482217,Michael Armbrust,1,false
+2053453944,Michael Feldman,1,false
+145459111,Michael Stillger,1,false
+1775622,Moritz Hardt,1,false
+1687211,P. Boncz,1,false
+5963711,P. Buneman,1,false
+90848074,P. O'Neil,1,false
+32850054,P. Selinger,1,false
+2706258,Pranav Rajpurkar,1,false
+47246179,R. Chaiken,1,false
+48560944,R. Grass,1,false
+1776817,R. Grossi,1,false
+3064965,Ron Avnur,1,false
+144112511,Ronald Fagin,1,false
+40412858,Ryan Marcus,1,false
+145647476,S. Chaudhuri,1,false
+1759150,S. Cluet,1,false
+23451726,Scott M. Lundberg,1,false
+3308557,Sepp Hochreiter,1,false
+1786259,Sergey Brin,1,false
+2203901,Stratos Idreos,1,false
+48881008,Tao Yu,1,false
+143993045,Thomas Neumann,1,false
+1746961,Tim Kraska,1,false
+31035595,Tom B. Brown,1,false
+1690411,U. Manber,1,false
+1787012,Viktor Leis,1,false
+2202709,Vinod Kumar Vavilapalli,1,false
+1688882,Yann LeCun,1,false
+1751762,Yoshua Bengio,1,false
+47112093,Yuan Yu,1,false
+47002813,Yujia Li,1,false

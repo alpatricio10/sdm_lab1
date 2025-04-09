@@ -1,0 +1,101 @@
+﻿paperId,title,dbCitations
+a6cb366736791bcccc5c8639de5a8f9636bf87e8,Adam: A Method for Stochastic Optimization,199
+204e3073870fae3d05bcbc2f6a8e263d9b72e776,Attention is All you Need,119
+2e9d221c206e9503ceb452302d68d10e293f2a10,Long Short-Term Memory,110
+d2c733e34d48784a37d717fe43d9e93277a8c53e,ImageNet: A large-scale hierarchical image database,100
+162d958ff885f1462aeda91cd72582323fd6a1f4,Gradient-based learning applied to document recognition,94
+18a5f443299784479e78d9e77f175af57cb2fa2b,Bigtable: a distributed storage system for structured data,89
+90abbc2cf38462b954ae1b772fac9532e2ccd8b0,Language Models are Few-Shot Learners,84
+eb42cf88027de515750f230b23b1a057dc782108,Very Deep Convolutional Networks for Large-Scale Image Recognition,80
+c5847fb3899eea98d544cced63d49886ecb17d9b,R-trees: a dynamic index structure for spatial searching,78
+87f40e6f3022adbc1f1905e3e506abad05a9964f,Distributed Representations of Words and Phrases and their Compositionality,73
+528838ae47c950720a8850792c09d4f82855bff4,Resilient Distributed Datasets: A Fault-Tolerant Abstraction for In-Memory Cluster Computing,69
+fa72afa9b2cbc8f0d7b05d52548906610ffbb9c5,Neural Machine Translation by Jointly Learning to Align and Translate,64
+f37e1b62a767a307c046404ca96bc140b3e68cb5,GloVe: Global Vectors for Word Representation,62
+e74f9b7f8eec6ba4704c206b93bc8079af3da4bd,ImageNet Large Scale Visual Recognition Challenge,61
+2d867297dfe0d3ce2ed5b1d0f2dff88cac46ee94,Pregel: a system for large-scale graph processing,59
+123fc2af8203708f8bd2b6c3e3d6a41dd8f9a30e,The log-structured merge-tree LSM-tree,58
+4954fa180728932959997a4768411ff9136aac81,TensorFlow: A system for large-scale machine learning,57
+054ce47ded43fcdd4f547466ee24ffb95b4e2fd9,Fast subsequence matching in time-series databases,57
+cea967b59209c6be22829699f05b8b1ac4dc092d,Sequence to Sequence Learning with Neural Networks,55
+c69859fd9ee74e5287c5dbf22ee7e82663fe8bdd,Benchmarking cloud serving systems with YCSB,55
+d67feafc224cfb6c97655066c151723214c74567,Efficient Similarity Search In Sequence Databases,51
+24281c886cd9339fe2fc5881faf5ed72b731a03e,Spark: Cluster Computing with Working Sets,49
+7def002796277facffe02aa09e3a1bb101ec0785,Access path selection in a relational database management system,47
+3ac939c4ada416858e1c1bff9e6f18aaa98323f3,Pig latin: a not-so-foreign language for data processing,47
+5f5dc5b9a2ba710937e2c413b37b053cd673df02,Auto-Encoding Variational Bayes,47
+a831bebe3947d22c88d84882fcd5cd2c09893171,The design and implementation of a log-structured file system,47
+3127190433230b3dc1abd0680bb58dced4bcd90e,Large Scale Distributed Deep Networks,45
+8978cf7574ceb35f4c3096be768c7547b28a35d0,A Fast Learning Algorithm for Deep Belief Nets,44
+7d906f6632f8740b540ce4d710f53ab0f97cfd5b,Dynamo: amazons highly available key-value store,44
+36eff562f65125511b5dfab68ce7f7a943c27478,Semi-Supervised Classification with Graph Convolutional Networks,43
+0b544dfe355a5070b60986319a3f51fb45d1348e,Learning Phrase Representations using RNN EncoderDecoder for Statistical Machine Translation,43
+55a62990a82bf9205e507f73d42583df46062806,A new approach to interdomain routing based on secure multi-party computation,41
+adaa0523a5c9d5f92aa2009a51226391d8e62380,Fairness through awareness,40
+72c78448fd8630545a3582c8e24cd7b88e008ab6,MonetDB/X100: Hyper-Pipelining Query Execution,40
+f6b51c8753a871dc94ff32152c00c01e94f90f09,Efficient Estimation of Word Representations in Vector Space,40
+4523a15a22bcabad38c81e1eba13a1bddd6704c5,Ubiquitous B-Tree,38
+bee044c8e8903fb67523c1f8c105ab4718600cdb,Explaining and Harnessing Adversarial Examples,38
+8429d29385ae410cef9a5cf6118528bbfc39a751,SCOPE: easy and efficient parallel processing of massive data sets,37
+19a22753a1ef61c2bd19e97961f8ed1b5a073c2c,Hive - A Warehousing Solution Over a Map-Reduce Framework,37
+09c5293b647fca40fde28ac6c38737f07e873e41,DryadLINQ: A System for General-Purpose Distributed Data-Parallel Computing Using a High-Level Language,37
+8388f1be26329fa45e5807e968a641ce170ea078,Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks,36
+888764f05a60d770cfc0b49944308fd92ed45ee5,"How Good Are Query Optimizers, Really",36
+e75c5d1b7ecd71cd9f1fdc3d07f56290517ef1e5,HyPer: A hybrid OLTPOLAP main memory database system based on virtual memory snapshots,36
+e1f3c9b4da3c84ef47d357140e842d44056c8a98,Optimal aggregation algorithms for middleware,35
+3e375c8d996b8c46c83b9d3f72732d7477e5fd86,Mesos: A Platform for Fine-Grained Resource Sharing in the Data Center,35
+67a2b9626157fecdef525c0d25bf7b051388a3a4,Robust chemical preservation of digital information on DNA in silica with error-correcting codes.,35
+d42b11ce90c9c69a20ed015b73dc33e0e4100a7b,Equality of Opportunity in Supervised Learning,34
+5c8fe9a0412a078e30eb7e5eeb0068655b673e86,A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise,33
+4cd96001b51a949e7504864ff576dddab9b166cc,Hekaton: SQL servers memory-optimized OLTP engine,33
+2e74388f55f2cc704c4de410578887a53a9433b0,Similarity Search in High Dimensions via Hashing,32
+ed8f6a72bd8903078cfaef866ca7d71e12c5b8f1,Dryad: distributed data-parallel programs from sequential building blocks,32
+8e773b1840b894603c06b677a0f15ebcf0f26378,Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task,31
+2dfeb5a90abc49ab2a80a492a01a4e2c8e92ec22,In-datacenter performance analysis of a tensor processing unit,31
+ada0b87cd5c30d31186c38fb12e631d29426a3bf,Spark SQL: Relational Data Processing in Spark,31
+d891dc72cbd40ffaeefdc79f2e7afe1e530a23ad,Intriguing properties of neural networks,31
+4c7bfa933c11c7a802c2fa9c1dc475dba36a2bd5,Hive - a petabyte scale data warehouse using Hadoop,31
+dc6ac3437f0a6e64e4404b1b9d188394f8a3bf71,Deep Inside Convolutional Networks: Visualising Image Classification Models and Saliency Maps,31
+1b6e810ce0afd0dd093f789d2b2742d047e316d5,Chain of Thought Prompting Elicits Reasoning in Large Language Models,31
+fff114cbba4f3ba900f33da574283e3de7f26c83,DeepWalk: online learning of social representations,30
+24cad9705ccc13fce969021a708ca703db3ae31c,LEO - DB2s LEarning Optimizer,30
+e4ce10063cd25447dcde75c2d9ce327446ced952,Calibrating Noise to Sensitivity in Private Data Analysis,30
+10d6778bc45aebcd58d336b4062b935861d2fe8a,The Anatomy of a Large-Scale Hypertextual Web Search Engine,30
+8c04f169203f9e55056a6f7f956695babe622a38,Distinctive Image Features from Scale-Invariant Keypoints,30
+4a1b5343a034bc72aa636a743b8bd8bc18812cce,An Efficient Cost-Driven Index Selection Tool for Microsoft SQL Server,29
+ea8bffcb56a412cf8843631c96797adf3b769aa8,High-order entropy-compressed text indexes,29
+0fee3b6c72f7676b4934651e517d0a328048c600,Certifying and Removing Disparate Impact,29
+287050dc91b146768c9d4435e5582fc9975ba84c,Learned Cardinalities: Estimating Correlated Joins with Deep Learning,29
+0539535989147bc7033f4a34931c7b8e17f1c650,The Case for Learned Index Structures,29
+3c8a456509e6c0805354bd40a35e3f2dbf8069b1,"PyTorch: An Imperative Style, High-Performance Deep Learning Library",29
+36f49b05d764bf5c10428b082c2d96c13c4203b9,Hogwild: A Lock-Free Approach to Parallelizing Stochastic Gradient Descent,28
+571b0750085ae3d939525e62af510ee2cee9d5ea,Improved Techniques for Training GANs,28
+4b6451abebe1810c5c7cbaca71544cbf85095c23,"Fast Similarity Search in the Presence of Noise, Scaling, and Translation in Time-Series Databases",28
+442e10a3c6640ded9408622005e3c2a8906ce4c2,A Unified Approach to Interpreting Model Predictions,28
+ec07db22a7906ab30fdfb50dafdccc27955aaeb6,Efficiently Compiling Efficient Query Plans for Modern Hardware,27
+3efd851140aa28e95221b55fcc5659eea97b172d,The Graph Neural Network Model,27
+eab5b35c52177b4f20c80b346ac9b623264d910e,Automated Selection of Materialized Views and Indexes in SQL Databases,27
+451d4a16e425ecbf38c4b1cca0dcf5d9bec8255c,GLUE: A Multi-Task Benchmark and Analysis Platform for Natural Language Understanding,27
+ed6297433cfc580837e87592f550cc96296c7d0a,Inherent Trade-Offs in the Fair Determination of Risk Scores,27
+4a0bb4eece00f3e9445d1a0d933422aa408ce8d1,Apache Hadoop YARN: yet another resource negotiator,26
+5ba52bbe1101939c490a06cc0cf316a09000834e,Neo: A Learned Query Optimizer,26
+6f556cfb6da2e07de1bce8960a698d26164ebbb2,Efficient Retrieval of the Top-k Most Relevant Spatial Web Objects,26
+41456f868a11dc9367cfdea1227138e546b14829,Efficient Retrieval of Similar Time Sequences Using DFT,26
+492f57ee9ceb61fb5a47ad7aebfec1121887a175,Gated Graph Sequence Neural Networks,26
+0ad8e89091eed09217e66adc98136126addc2619,PowerGraph: Distributed Graph-Parallel Computation on Natural Graphs,26
+8605efd48eab192b78f1f666ffd7fba6744494e1,Database Cracking,26
+98ca08bdb4092d59ef6efcedf8003239f89cf58f,Naiad: a timely dataflow system,26
+29946f1724104a47d73ab9c88cde129505b66ee5,Fast Algorithms for Mining Association Rules in Large Databases,26
+09b17d2ea600fea95a440e22f2ffdc2d63c47744,The Bw-Tree: A B-tree for new hardware platforms,26
+1976c9eeccc7115d18a04f1e7fb5145db6b96002,Freebase: a collaboratively created graph database for structuring human knowledge,25
+d766bffc357127e0dc86dd69561d5aeb520d6f4c,Training language models to follow instructions with human feedback,25
+070f03f5e8b016628903c56a0011e810d0914d73,Eddies: continuously adaptive query processing,25
+71ef214efae92e788b4020358d23d83525ab193e,Why and Where: A Characterization of Data Provenance,25
+9819b600a828a57e1cde047bbe710d3446b30da5,Recurrent neural network based language model,25
+8ce4c0ee315d86f32ec7354ccdf8d8996e8ee270,The Hadoop Distributed File System,25
+d04d6db5f0df11d0cff57ec7e15134990ac07a4f,Learning Deep Architectures for AI,25
+18b89ae68d587b5150fbf2e933bcbc1c3404bee9,A comparison of approaches to large-scale data analysis,24
+6a9fa4c579bfd4fe4b1b06f384b946c5c28e1c47,Automatic Database Management System Tuning Through Large-scale Machine Learning,24
+df493d2feda5e3e96084bec640a3b956485d9d05,Compressed full-text indexes,24
+66c797950b9b61b9019de53609218723c953acc7,A Space-Economical Suffix Tree Construction Algorithm,24
+1337a72073e2c80da6e53b776ccb469d5abb0579,Suffix arrays: a new method for on-line string searches,24
