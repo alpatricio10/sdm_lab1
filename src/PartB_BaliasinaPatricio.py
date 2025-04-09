@@ -5,9 +5,10 @@ uri = "bolt://localhost:7687"
 username = "neo4j"  
 password = "password" 
 
-def clear_communities(tx):
+def clear_step(tx):
     query="MATCH (rc:ResearchCommunity) DETACH DELETE rc;"
     tx.run(query)
+
 
 def run_step_1(tx):
     query = """
@@ -48,7 +49,7 @@ def run_step_2(tx):
 
         MERGE (c)-[:RELATED_TO]->(dbComm)
 
-        RETURN c.conferenceName AS venueName,
+        RETURN c.conferenceName AS venueName, 
                 "Conference"     AS venueType
 
         UNION
@@ -72,7 +73,7 @@ def run_step_2(tx):
 
         MERGE (j)-[:RELATED_TO]->(dbComm)
 
-        RETURN j.journalName AS venueName,
+        RETURN j.journalName AS venueName, 
                 "Journal"     AS venueType
         }
 
@@ -101,30 +102,23 @@ def run_step_3(tx):
         LIMIT 100
 
         MERGE (dbComm)-[:HAS_TOP_PAPER]->(p)
-        RETURN p.paperId AS paperId, p.title AS title, dbCitations
-        LIMIT 10;
+        RETURN p.paperId AS paperId, p.title AS title, dbCitations;
     """
     result = tx.run(query)
     return result.data()
 
-def run_step_4(tx):
+def run_query_4(tx):
     query = """
-        MATCH (dbComm:ResearchCommunity {name: "Database"})
-        MATCH (a:Author)-[:WRITES]->(p:TopDBPaper)
-        WITH dbComm, a, COUNT(DISTINCT p) AS topPaperCount
-
-        MERGE (dbComm)-[r:HAS_GOOD_REVIEWER]->(a)
-
-        SET r.topPaperCount = topPaperCount,
-            r.isGuru = (topPaperCount >= 2)
-
-        RETURN
-        a.authorId AS authorId,
-        a.name AS authorName,
-        r.topPaperCount AS relPaperCount,
-        r.isGuru AS relIsGuru
-        ORDER BY relPaperCount DESC, authorName
-        LIMIT 10;
+        MATCH (a:Author)-[:WRITES]->(p:Paper)
+        WITH a.name AS authorName, p.citationCount AS citationCount
+        ORDER BY citationCount DESC
+        WITH authorName, COLLECT(citationCount) AS sortedCitationCount
+        UNWIND RANGE(1, SIZE(sortedCitationCount)) AS hIndex
+        WITH authorName, hIndex, sortedCitationCount[hIndex-1] AS citationCount
+        WHERE citationCount >= hIndex
+        RETURN authorName, MAX(hIndex) AS hIndex
+        ORDER BY hIndex DESC
+        LIMIT 10
     """
     result = tx.run(query)
     return result.data()
@@ -132,32 +126,29 @@ def run_step_4(tx):
 with GraphDatabase.driver(uri, auth=(username, password)) as driver:
     try:
         with driver.session() as session:
-            session.execute_write(clear_communities)
-
-        with driver.session() as session:
-            print("Step 1 Results:\n")
-            q1_result = session.execute_write(run_step_1)
+            print("Query 1 Results:\n")
+            q1_result = session.execute_write(run_query_1)
             print(q1_result)
 
         print("\n")
 
         with driver.session() as session:
-            print("Step 2 Results:\n")
-            q2_result = session.execute_write(run_step_2)
+            print("Query 2 Results:\n")
+            q2_result = session.execute_write(run_query_2)
             print(q2_result)
 
         print("\n")
 
         with driver.session() as session:
-            print("Step 3 Results:\n")
-            q3_result = session.execute_write(run_step_3)
+            print("Query 3 Results:\n")
+            q3_result = session.execute_write(run_query_3)
             print(q3_result)
 
         print("\n")
 
         with driver.session() as session:
-            print("Step 4 Results:\n")
-            q4_result = session.execute_write(run_step_4)
+            print("Query 4 Results:\n")
+            q4_result = session.execute_write(run_query_4)
             print(q4_result)
 
     except Exception as e:
