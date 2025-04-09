@@ -330,5 +330,11 @@ for conf_name in major_confs:
                     pd.DataFrame([new_entry])
                 ], ignore_index=True)
 
+# print("Unique (conferenceName, year) pairs:", proceedings_nodes[['conferenceName','year']].drop_duplicates().shape[0])
+# print(proceedings_nodes[['conferenceName','year']].drop_duplicates().sort_values(['conferenceName','year']).head(50))
+
+# grouped = proceedings_nodes.groupby('conferenceName')['year'].nunique()
+# print(grouped.sort_values(ascending=False).head(20))
+
 # Now save the updated author_writes_paper with the newly added authors
 author_writes_paper.to_csv('author_writes_paper.csv', index=False)
