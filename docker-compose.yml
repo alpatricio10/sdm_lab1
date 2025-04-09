@@ -1,0 +1,15 @@
+services:
+  neo4j:
+    image: neo4j:latest
+    ports:
+      - 7474:7474
+      - 7687:7687
+    environment:
+      - NEO4J_AUTH=neo4j/password
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_security_procedures_unrestricted=gds.*,apoc.*
+      
+    volumes:
+      - $HOME/sdm_lab1/sdm_lab1/src/import:/var/lib/neo4j/import
+      - $HOME/sdm_lab1/sdm_lab1/src/plugins/neo4j-graph-data-science-2.16.0.jar:/var/lib/neo4j/plugins/graph-data-science.jar
+    command: neo4j
