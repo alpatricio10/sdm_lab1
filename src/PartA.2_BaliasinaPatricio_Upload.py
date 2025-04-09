@@ -56,7 +56,8 @@ def load_csv_data(driver):
             conferenceName: row.conferenceName, 
             year: toInteger(row.year), 
             venue: row.venue, 
-            city: row.city
+            city: row.city,
+            edition: row.edition
         })
         """,
         

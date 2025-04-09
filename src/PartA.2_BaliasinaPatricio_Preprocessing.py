@@ -5,6 +5,9 @@ import uuid
 import re
 from datetime import datetime
 
+# Set random seed for reproducibility
+random.seed(42)
+
 # Function to generate random emails based on author names
 def generate_email(name):
     name = re.sub(r'[^\w\s]', '', name).lower()
@@ -38,10 +41,8 @@ def generate_city_and_venue():
     
     city = random.choice(list(city_university_pairs.keys()))
     venue = random.choice(city_university_pairs[city])
-    
     return city, venue
 
-# Clean the venue names
 def clean_venue_name(name):
     if isinstance(name, str):
         name = name.strip('"')
@@ -59,17 +60,16 @@ def clean_venue_name(name):
         name = name.strip(' .,;:-"')
     return name
 
-# Clean text e.g. abstract and title
 def clean_text(text):
     if isinstance(text, str):
-        text = re.sub(r'[^A-Za-z0-9\s.,-:]', '', text)  
-        text = re.sub(r'\s+', ' ', text).strip()  
+        text = re.sub(r'[^A-Za-z0-9\s.,-:]', '', text)
+        text = re.sub(r'\s+', ' ', text).strip()
     return text
 
 def convert_int(value):
     try:
         return int(value)
-    except Exception:
+    except:
         return value
 
 # Load the data
@@ -86,6 +86,7 @@ papers['pages'] = papers['pages'].apply(clean_text)
 venues['name'] = venues['name'].apply(clean_venue_name)
 
 # Create nodes and relationships dataframes
+
 # 1. Author nodes
 author_nodes = pd.DataFrame({
     'authorId': authors['authorId'].apply(lambda x: str(x).split('.')[0]),
@@ -107,25 +108,25 @@ paper_nodes = pd.DataFrame({
 paper_nodes.to_csv('paper_nodes.csv', index=False)
 
 # 3. Journal nodes 
+#    Make sure we're checking for "Journal" (not "Journal") if that's how your CSV identifies them.
 journals = []
-for index, row in venues.iterrows():
-    if row['venueType'] == 'JournalArticle':
-        journals.append({
-            'journalName': row['name'],
-        })
+for _, row in venues.iterrows():
+    # If your final CSV stores 'Journal' instead of 'Journal':
+    if row['venueType'] == 'Journal':
+        journals.append({'journalName': row['name']})
 
 journal_nodes = pd.DataFrame(journals).drop_duplicates(subset=['journalName'])
 journal_nodes.to_csv('journal_nodes.csv', index=False)
 
-# 4. Keyword nodes 
+# 4. Keyword nodes
 keyword_nodes = pd.DataFrame({
     'keyword': keywords['keyword']
 }).drop_duplicates(subset=['keyword'])
 keyword_nodes.to_csv('keyword_nodes.csv', index=False)
 
-# 5. Proceedings nodes 
+# 5. Proceedings nodes
 proceedings = []
-for index, row in papers.iterrows():
+for _, row in papers.iterrows():
     city, venue = generate_city_and_venue()
     if row['venueType'] == 'Conference':
         proceedings.append({
@@ -141,20 +142,22 @@ proceedings_nodes.sort_values(by=['conferenceName', 'year'], inplace=True)
 proceedings_nodes['edition'] = proceedings_nodes.groupby('conferenceName')['year'].transform(lambda x: x - x.iloc[0] + 1).astype(int)
 proceedings_nodes.to_csv('proceedings_nodes.csv', index=False)
 
-# 6. Conferences nodes 
+# 6. Conferences nodes
 conferences = []
-for index, row in venues.iterrows():
+for _, row in venues.iterrows():
     if row['venueType'] == 'Conference':
-        conferences.append({
-            'conferenceName': row['name']
-        })
+        conferences.append({'conferenceName': row['name']})
 
 conference_nodes = pd.DataFrame(conferences).drop_duplicates(subset=['conferenceName'])
 conference_nodes.to_csv('conferences_nodes.csv', index=False)
 
+# ---------------------------
+# RELATIONSHIPS
+# ---------------------------
+
 # 1. Author writes Paper
 author_papers = []
-for index, row in papers.iterrows():
+for _, row in papers.iterrows():
     paperId = row['paperId']
     if isinstance(row['authors'], str):
         author_list = row['authors'].split(';')
@@ -166,14 +169,12 @@ for index, row in papers.iterrows():
             })
 
 author_writes_paper = pd.DataFrame(author_papers)
-author_writes_paper.to_csv('author_writes_paper.csv', index=False)
 
-# 2. Author reviews Paper (random assignment)
+# 2. Author reviews Paper
 reviewer_assignments = []
 for paper_id in papers['paperId']:
     reviewer_count = generate_weighted_reviewer_count()
-
-    # Get reviewers different from authors of this paper
+    # exclude authors of this paper from reviewers
     paper_authors = author_writes_paper[author_writes_paper['paperId'] == paper_id]['authorId'].tolist()
     potential_reviewers = authors[~authors['authorId'].isin(paper_authors)]['authorId'].sample(reviewer_count).apply(lambda x: str(x).split('.')[0])
     
@@ -188,8 +189,9 @@ author_reviews_paper.to_csv('author_reviews_paper.csv', index=False)
 
 # 3. Paper published in Journal
 paper_journal = []
-for index, row in papers.iterrows():
-    if row['venueType'] == 'JournalArticle':
+for _, row in papers.iterrows():
+    # Again, make sure we match "Journal"
+    if row['venueType'] == 'Journal':
         paper_journal.append({
             'paperId': row['paperId'],
             'journalName': row['venue'],
@@ -202,7 +204,7 @@ paper_published_in.to_csv('paper_published_in.csv', index=False)
 
 # 4. Paper cites Paper
 paper_citations = []
-for index, row in papers.iterrows():
+for _, row in papers.iterrows():
     paper_id = row['paperId']
     if isinstance(row['references'], str):
         references = row['references'].split(';')
@@ -217,19 +219,22 @@ for index, row in papers.iterrows():
 paper_cites_paper = pd.DataFrame(paper_citations)
 paper_cites_paper.to_csv('paper_cites_paper.csv', index=False)
 
-# 5. Paper presented in 
-paper_presented_in = []
-for index, row in papers.iterrows():
+# 5. Paper presented in
+paper_presented_in_data = []
+for _, row in papers.iterrows():
     if row['venueType'] == 'Conference':
-        proceeding = proceedings_nodes[(proceedings_nodes['conferenceName'] == row['venue']) & (proceedings_nodes['year'] == row['year'])]
+        proceeding = proceedings_nodes[
+            (proceedings_nodes['conferenceName'] == row['venue']) &
+            (proceedings_nodes['year'] == row['year'])
+        ]
         if not proceeding.empty:
-            proceedingId = proceeding['proceedingId'].iloc[0]  
-            paper_presented_in.append({
+            proceedingId = proceeding['proceedingId'].iloc[0]
+            paper_presented_in_data.append({
                 'paperId': row['paperId'],
-                'proceedingId': proceedingId 
+                'proceedingId': proceedingId
             })
 
-paper_presented_in = pd.DataFrame(paper_presented_in)
+paper_presented_in = pd.DataFrame(paper_presented_in_data)
 paper_presented_in.to_csv('paper_presented_in.csv', index=False)
 
 # 6. Proceedings is part of Conference
@@ -242,3 +247,88 @@ paper_has_keyword = pd.DataFrame({
     'keyword': keywords['keyword'],
 })
 paper_has_keyword.to_csv('paper_has_keyword.csv', index=False)
+
+# ------------------------------------------------------------------
+# NEW CODE: Conferences with >=4 editions => pick authors & add
+# ------------------------------------------------------------------
+
+conf_year_counts = proceedings_nodes.groupby('conferenceName')['year'].nunique()
+major_confs = conf_year_counts[conf_year_counts >= 4].index.tolist()
+
+for conf_name in major_confs:
+    # All proceedings (yearly editions) for this conference
+    conf_proceedings = proceedings_nodes[proceedings_nodes['conferenceName'] == conf_name]
+    conf_years = conf_proceedings['year'].unique().tolist()
+    if len(conf_years) < 4:
+        continue
+
+    # pick a random year
+    chosen_year = random.choice(conf_years)
+    
+    # find the proceedingId for that chosen year
+    chosen_proc = conf_proceedings[conf_proceedings['year'] == chosen_year]
+    if chosen_proc.empty:
+        continue
+    chosen_proc_id = chosen_proc.iloc[0]['proceedingId']
+
+    # find all papers from that proceeding
+    year_papers = paper_presented_in.loc[
+        paper_presented_in['proceedingId'] == chosen_proc_id,
+        'paperId'
+    ].tolist()
+    if not year_papers:
+        continue
+
+    # pick exactly 1 paper
+    chosen_paper = random.choice(year_papers)
+
+    # pick exactly 2 authors from that paper
+    these_authors = author_writes_paper.loc[
+        author_writes_paper['paperId'] == chosen_paper, 
+        'authorId'
+    ].unique().tolist()
+    if len(these_authors) < 2:
+        continue
+    chosen_authors = random.sample(these_authors, 2)
+
+    # pick 3 other years, place each chosen author in 1 random paper from each year
+    other_years = [y for y in conf_years if y != chosen_year]
+    if len(other_years) < 3:
+        continue
+
+    for auth_id in chosen_authors:
+        chosen_years_for_author = random.sample(other_years, 3)
+
+        for oy in chosen_years_for_author:
+            row_oy_proc = conf_proceedings[conf_proceedings['year'] == oy]
+            if row_oy_proc.empty:
+                continue
+            oy_proc_id = row_oy_proc.iloc[0]['proceedingId']
+
+            oy_papers = paper_presented_in.loc[
+                paper_presented_in['proceedingId'] == oy_proc_id,
+                'paperId'
+            ].unique()
+            if len(oy_papers) == 0:
+                continue
+
+            chosen_paper_for_author = random.choice(oy_papers)
+
+            # Use pd.concat instead of .append
+            existing = author_writes_paper[
+                (author_writes_paper['paperId'] == chosen_paper_for_author) &
+                (author_writes_paper['authorId'] == auth_id)
+            ]
+            if existing.empty:
+                new_entry = {
+                    'authorId': auth_id,
+                    'paperId': chosen_paper_for_author,
+                    'corresponding_author': False
+                }
+                author_writes_paper = pd.concat([
+                    author_writes_paper,
+                    pd.DataFrame([new_entry])
+                ], ignore_index=True)
+
+# Now save the updated author_writes_paper with the newly added authors
+author_writes_paper.to_csv('author_writes_paper.csv', index=False)
